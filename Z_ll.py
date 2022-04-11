@@ -112,9 +112,9 @@ def cut_lep_charge(lep_charge):
 def cut_lep_type(lep_type):
 # for an electron lep_type is 11
 # for a muon lep_type is 13
-# throw away when none of ee, mumu, emu
+# throw away when none of ee, mumu
     sum_lep_type = lep_type[:, 0] + lep_type[:, 1]
-    return (sum_lep_type != 22) & (sum_lep_type != 26) & (sum_lep_type != 24)
+    return (sum_lep_type != 22) & (sum_lep_type != 26)
 
 #Applying a cut
 
