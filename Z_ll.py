@@ -10,8 +10,7 @@ from matplotlib.ticker import AutoMinorLocator # for minor ticks
 import infofile # local file containing cross-sections, sums of weights, dataset IDs
 
 #Lumi, fraction, file path
-
-#lumi = 0.5 # fb-1 # data_A only
+#lumi = 0.5 # fb-1 # data_A only 
 #lumi = 1.9 # fb-1 # data_B only
 #lumi = 2.9 # fb-1 # data_C only
 #lumi = 4.7 # fb-1 # data_D only
@@ -36,11 +35,11 @@ samples = {
     },
 
     r'Background $ZZ^*$' : { # ZZ
-        'list' : ['llll'],
+        'list' : ['ll'],
         'color' : "#ff0000" # red
     },
 
-    r'Signal ($m_H$ = 125 GeV)' : { # H -> ZZ -> llll
+    r'Signal ($m_H$ = 125 GeV)' : { # Z -> ll
         'list' : ['ggH125_ZZ4lep','VBFH125_ZZ4lep','WH125_ZZ4lep','ZH125_ZZ4lep'],
         'color' : "#00cdff" # light blue
     },
@@ -62,7 +61,7 @@ def get_data_from_files():
             if s == 'data': prefix = "Data/" # Data prefix
             else: # MC prefix
                 prefix = "MC/mc_"+str(infofile.infos[val]["DSID"])+"."
-            fileString = tuple_path+prefix+val+".4lep.root" # file name to open
+            fileString = tuple_path+prefix+val+".2lep.root" # file name to open
             temp = read_file(fileString,val) # call the function read_file defined below
             frames.append(temp) # append array returned from read_file to list of awkward arrays
         data[s] = ak.concatenate(frames) # dictionary entry is concatenated awkward arrays
@@ -96,7 +95,7 @@ def calc_mll(lep_pt, lep_eta, lep_phi, lep_E):
     # calculate invariant mass of first 2 leptons
     # [:, i] selects the i-th lepton in each event
     # .M calculates the invariant mass
-    return (p4[:, 0] + p4[:, 1]).M * MeV
+    return ((p4[:, 0] + p4[:, 1]).M * MeV > 6600) & ((p4[:, 0] + p4[:, 1]).M * Mev < 11600)
 
 #Changing a cut
 
