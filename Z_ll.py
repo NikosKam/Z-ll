@@ -16,7 +16,7 @@ import infofile # local file containing cross-sections, sums of weights, dataset
 #lumi = 4.7 # fb-1 # data_D only
 lumi = 10 # fb-1 # data_A,data_B,data_C,data_D
 
-fraction = 1.0 # reduce this is if you want the code to run quicker
+fraction = 0.1 # reduce this is if you want the code to run quicker
                                                                                                                                   
 #tuple_path = "Input/2lep/" # local 
 tuple_path = "https://atlas-opendata.web.cern.ch/atlas-opendata/samples/2020/2lep/" # web address
@@ -29,18 +29,18 @@ samples = {
         'list' : ['data_A','data_B','data_C','data_D'],
     },
 
-    r'Background $Z,t\bar{t}$' : { # Z + ttbar
-        'list' : ['Zee','Zmumu','ttbar_lep'],
+    r'Background $ZPrime$' : { # ZPrime
+        'list' : ['ZPrime2000_ee','ZPrime2000_mumu','ZPrime400_tt','ZPrime3000_ee','ZPrime3000_mumu','ZPrime500_tt','ZPrime4000_ee','ZPrime4000_mumu','ZPrime750_tt','ZPrime5000_ee','ZPrime1000_tt','ZPrime2000_tt','ZPrime3000_tt'],
         'color' : "#6b59d3" # purple
     },
 
-    r'Background $ZZ^*$' : { # ZZ
-        'list' : ['ll'],
+    r'Background $Z$' : { # Mono Z
+        'list' : ['llvv'],
         'color' : "#ff0000" # red
     },
 
-    r'Signal ($m_H$ = 125 GeV)' : { # Z -> ll
-        'list' : ['ggH125_ZZ4lep','VBFH125_ZZ4lep','WH125_ZZ4lep','ZH125_ZZ4lep'],
+    r'Background $Single top$' : { #Single top
+        'list' : ['single_top_tchan','single_top_wtchan','single_top_schan'],
         'color' : "#00cdff" # light blue
     },
 
@@ -87,7 +87,7 @@ def get_xsec_weight(sample):
     xsec_weight = (lumi*1000*info["xsec"])/(info["sumw"]*info["red_eff"]) #*1000 to go from fb-1 to pb-1
     return xsec_weight # return cross-section weight
 
-#define function to calculate 4-lepton invariant mass
+#define function to calculate 2-lepton invariant mass
 
 def calc_mll(lep_pt, lep_eta, lep_phi, lep_E):
     # construct awkward 4-vector array
@@ -95,7 +95,8 @@ def calc_mll(lep_pt, lep_eta, lep_phi, lep_E):
     # calculate invariant mass of first 2 leptons
     # [:, i] selects the i-th lepton in each event
     # .M calculates the invariant mass
-    return ((p4[:, 0] + p4[:, 1]).M * MeV > 6600) & ((p4[:, 0] + p4[:, 1]).M * Mev < 11600)
+    #return ((p4[:, 0] + p4[:, 1]).M * MeV > 6600) & ((p4[:, 0] + p4[:, 1]).M * MeV < 11600)
+    return (p4[:, 0] + p4[:, 1]).M * MeV
 
 #Changing a cut
 
@@ -147,7 +148,7 @@ def read_file(path,sample):
             # cut on lepton type using the function cut_lep_type defined above
             data = data[~cut_lep_type(data.lep_type)]
 
-            # calculation of 4-lepton invariant mass using the function calc_mllll defined above
+            # calculation of 2-lepton invariant mass using the function calc_mll defined above
             data['mll'] = calc_mll(data.lep_pt, data.lep_eta, data.lep_phi, data.lep_E)
 
             # array contents can be printed at any stage like this
@@ -177,8 +178,8 @@ print("Time taken: "+str(round(elapsed,1))+"s") # print total time taken to proc
 
 def plot_data(data):
 
-    xmin = 80 * GeV
-    xmax = 250 * GeV
+    xmin = 65 * GeV
+    xmax = 120 * GeV
     step_size = 5 * GeV
 
     bin_edges = np.arange(start=xmin, # The interval includes this value
@@ -192,9 +193,6 @@ def plot_data(data):
                             bins=bin_edges ) # histogram the data
     data_x_errors = np.sqrt( data_x ) # statistical error on the data
 
-    signal_x = ak.to_numpy(data[r'Signal ($m_H$ = 125 GeV)']['mll']) # histogram the signal
-    signal_weights = ak.to_numpy(data[r'Signal ($m_H$ = 125 GeV)'].totalWeight) # get the weights of the signal events
-    signal_color = samples[r'Signal ($m_H$ = 125 GeV)']['color'] # get the colour for the signal bar
 
     mc_x = [] # define list to hold the Monte Carlo histogram entries
     mc_weights = [] # define list to hold the Monte Carlo weights
@@ -202,12 +200,12 @@ def plot_data(data):
     mc_labels = [] # define list to hold the legend labels of the Monte Carlo bars
 
     for s in samples: # loop over samples
-        if s not in ['data', r'Signal ($m_H$ = 125 GeV)']: # if not data nor signal
+        if s not in ['data']: # if not data
             mc_x.append( ak.to_numpy(data[s]['mll']) ) # append to the list of Monte Carlo histogram entries
             mc_weights.append( ak.to_numpy(data[s].totalWeight) ) # append to the list of Monte Carlo weights
             mc_colors.append( samples[s]['color'] ) # append to the list of Monte Carlo bar colors
-            mc_labels.append( s ) # append to the list of Monte Carlo legend labels
-    
+            mc_labels.append( s ) # append to the list of Monte Carlo legend labels  
+        
 
 
     # *************
@@ -230,10 +228,7 @@ def plot_data(data):
     # calculate MC statistical uncertainty: sqrt(sum w^2)
     mc_x_err = np.sqrt(np.histogram(np.hstack(mc_x), bins=bin_edges, weights=np.hstack(mc_weights)**2)[0])
     
-    # plot the signal bar
-    main_axes.hist(signal_x, bins=bin_edges, bottom=mc_x_tot, 
-                   weights=signal_weights, color=signal_color,
-                   label=r'Signal ($m_H$ = 125 GeV)')
+
     
     # plot the statistical uncertainty
     main_axes.bar(bin_centres, # x
@@ -293,7 +288,7 @@ def plot_data(data):
     # Add a label for the analysis carried out
     plt.text(0.05, # x
              0.76, # y
-             r'$H \rightarrow ZZ^* \rightarrow 2\ell$', # text 
+             r'$Z \rightarrow 2\ell$', # text 
              transform=main_axes.transAxes ) # coordinate system used is that of main_axes
 
     # draw the legend
@@ -302,3 +297,4 @@ def plot_data(data):
     return
 
 plot_data(data)
+plt.show()
