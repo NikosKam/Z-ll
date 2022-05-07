@@ -29,12 +29,17 @@ samples = {
         'list' : ['data_A','data_B','data_C','data_D'],
     },
 
-    r'Background $ZPrime$' : { # ZPrime
-        'list' : ['ZPrime2000_ee','ZPrime2000_mumu','ZPrime400_tt','ZPrime3000_ee','ZPrime3000_mumu','ZPrime500_tt','ZPrime4000_ee','ZPrime4000_mumu','ZPrime750_tt','ZPrime5000_ee','ZPrime1000_tt','ZPrime2000_tt','ZPrime3000_tt'],
+     r'Background $Z,t\bar{t}$' : { # Z + ttbar
+        'list' : ['Zee','Zmumu','ttbar_lep'],
         'color' : "#6b59d3" # purple
     },
 
-    r'Background $Z$' : { # Mono Z
+    r'Background $Diboson$' : { # WW, ZZ, WZ
+        'list' : ['ZqqZll','WqqZll','WpqqWmlv','WlvZqq'],
+        'color' : "#59cbd3" # cyan
+    },
+
+    r'Background $Z -> ll$' : { # Z -> ll
         'list' : ['llvv'],
         'color' : "#ff0000" # red
     },
