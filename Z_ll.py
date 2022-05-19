@@ -16,7 +16,7 @@ import infofile # local file containing cross-sections, sums of weights, dataset
 #lumi = 4.7 # fb-1 # data_D only
 lumi = 10 # fb-1 # data_A,data_B,data_C,data_D
 
-fraction = 0.1 # reduce this is if you want the code to run quicker
+fraction = 0.01 # reduce this is if you want the code to run quicker
                                                                                                                                   
 #tuple_path = "Input/2lep/" # local 
 tuple_path = "https://atlas-opendata.web.cern.ch/atlas-opendata/samples/2020/2lep/" # web address
@@ -29,18 +29,25 @@ samples = {
         'list' : ['data_A','data_B','data_C','data_D'],
     },
 
-     r'Background $Z,t\bar{t}$' : { # Z + ttbar
-        'list' : ['Zee','Zmumu','ttbar_lep'],
+     r'Background $t\bar{t}$' : { #ttbar
+        'list' : ['ttbar_lep'], #'Zee','Zmumu',
         'color' : "#6b59d3" # purple
+    },
+
+    r'Background $Z+jets$' : { #Z + jets
+        'list' : ['Zmumu_PTV0_70_CVetoBVeto','Zmumu_PTV0_70_CFilterBVeto','Zmumu_PTV0_70_BFilter','Zmumu_PTV70_140_CVetoBVeto','Zmumu_PTV70_140_CFilterBVeto','Zmumu_PTV70_140_BFilter','Zmumu_PTV140_280_CVetoBVeto','Zmumu_PTV140_280_CFilterBVeto','Zmumu_PTV140_280_BFilter','Zmumu_PTV280_500_CVetoBVeto','Zmumu_PTV280_500_CFilterBVeto','Zmumu_PTV280_500_BFilter','Zmumu_PTV500_1000','Zmumu_PTV1000_E_CMS',
+        'Zee_PTV0_70_CVetoBVeto','Zee_PTV0_70_CFilterBVeto','Zee_PTV0_70_BFilter','Zee_PTV70_140_CVetoBVeto','Zee_PTV70_140_CFilterBVeto','Zee_PTV70_140_BFilter','Zee_PTV140_280_CVetoBVeto','Zee_PTV140_280_CFilterBVeto','Zee_PTV140_280_BFilter','Zee_PTV280_500_CVetoBVeto','Zee_PTV280_500_CFilterBVeto','Zee_PTV280_500_BFilter','Zee_PTV500_1000','Zee_PTV1000_E_CMS',
+        'Ztautau_PTV0_70_CVetoBVeto','Ztautau_PTV0_70_CFilterBVeto','Ztautau_PTV0_70_BFilter','Ztautau_PTV70_140_CVetoBVeto','Ztautau_PTV70_140_CFilterBVeto','Ztautau_PTV70_140_BFilter','Ztautau_PTV140_280_CVetoBVeto','Ztautau_PTV140_280_CFilterBVeto','Ztautau_PTV140_280_BFilter','Ztautau_PTV280_500_CVetoBVeto','Ztautau_PTV280_500_CFilterBVeto','Ztautau_PTV280_500_BFilter','Ztautau_PTV500_1000','Ztautau_PTV1000_E_CMS'],
+        'color' : "#eef207" # yellow
     },
 
     r'Background $Diboson$' : { # WW, ZZ, WZ
         'list' : ['ZqqZll','WqqZll','WpqqWmlv','WlvZqq'],
-        'color' : "#59cbd3" # cyan
+        'color' : "#1fa125" # green
     },
 
     r'Background $Z -> ll$' : { # Z -> ll
-        'list' : ['llvv'],
+        'list' : ['Zee','Zmumu','ttbar_lep'], #'llvv'
         'color' : "#ff0000" # red
     },
 
@@ -102,6 +109,11 @@ def calc_mll(lep_pt, lep_eta, lep_phi, lep_E):
     # .M calculates the invariant mass
     #return ((p4[:, 0] + p4[:, 1]).M * MeV > 6600) & ((p4[:, 0] + p4[:, 1]).M * MeV < 11600)
     return (p4[:, 0] + p4[:, 1]).M * MeV
+
+#define function to calculate pt of the Z boson candidate
+#def calc_Zpt(lep_pt):
+ #   pt = vector.awk(ak.zip(dict(Zpt=lep_pt)))
+  #  return (pt[:, 0]+pt[:, 1]).M * MeV
 
 #Changing a cut
 
@@ -165,6 +177,13 @@ def read_file(path,sample):
             # multiple array columns can be printed at any stage like this
             #print(data[['lep_pt','lep_eta']])
 
+            #calculating data/MC
+            #print(data['data']/data['data']['mll'])
+
+            #calculating pt of the Z boson candidate
+            #data['Zpt'] = calc_Zpt(data.lep_pt)
+
+
             nOut = len(data) # number of events passing cuts in this batch
             data_all.append(data) # append array from this batch
             elapsed = time.time() - start # time taken to process
@@ -179,13 +198,14 @@ data = get_data_from_files() # process all files
 elapsed = time.time() - start # time after whole processing
 print("Time taken: "+str(round(elapsed,1))+"s") # print total time taken to process every file
 
+
 #Plotting
 
 def plot_data(data):
 
     xmin = 65 * GeV
     xmax = 120 * GeV
-    step_size = 5 * GeV
+    step_size = 1 * GeV
 
     bin_edges = np.arange(start=xmin, # The interval includes this value
                      stop=xmax+step_size, # The interval doesn't include this value
@@ -211,8 +231,7 @@ def plot_data(data):
             mc_colors.append( samples[s]['color'] ) # append to the list of Monte Carlo bar colors
             mc_labels.append( s ) # append to the list of Monte Carlo legend labels  
         
-
-
+    
     # *************
     # Main plot 
     # *************
@@ -299,6 +318,9 @@ def plot_data(data):
     # draw the legend
     main_axes.legend( frameon=False ) # no box around the legend
     
+    #logarithmic y-axis
+    main_axes.set_yscale('log')
+
     return
 
 plot_data(data)
