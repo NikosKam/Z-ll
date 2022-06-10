@@ -4,6 +4,7 @@ import vector # for 4-momentum calculations
 import time # to measure time to analyse
 import math # for mathematical functions such as square root
 import numpy as np # for numerical calculations such as histogramming
+import numpy.ma as ma
 import matplotlib.pyplot as plt # for plotting
 from matplotlib.ticker import AutoMinorLocator # for minor ticks
 
@@ -16,7 +17,7 @@ import infofile # local file containing cross-sections, sums of weights, dataset
 #lumi = 4.7 # fb-1 # data_D only
 lumi = 10 # fb-1 # data_A,data_B,data_C,data_D
 
-fraction = 0.01 # reduce this is if you want the code to run quicker
+fraction = 0.001 # reduce this is if you want the code to run quicker
                                                                                                                                   
 #tuple_path = "Input/2lep/" # local 
 tuple_path = "https://atlas-opendata.web.cern.ch/atlas-opendata/samples/2020/2lep/" # web address
@@ -29,29 +30,39 @@ samples = {
         'list' : ['data_A','data_B','data_C','data_D'],
     },
 
-     r'Background $t\bar{t}$' : { #ttbar
+     r'$t\bar{t}$' : { #ttbar
         'list' : ['ttbar_lep'], #'Zee','Zmumu',
         'color' : "#6b59d3" # purple
     },
 
-    r'Background $Z+jets$' : { #Z + jets
-        'list' : ['Zmumu_PTV0_70_CVetoBVeto','Zmumu_PTV0_70_CFilterBVeto','Zmumu_PTV0_70_BFilter','Zmumu_PTV70_140_CVetoBVeto','Zmumu_PTV70_140_CFilterBVeto','Zmumu_PTV70_140_BFilter','Zmumu_PTV140_280_CVetoBVeto','Zmumu_PTV140_280_CFilterBVeto','Zmumu_PTV140_280_BFilter','Zmumu_PTV280_500_CVetoBVeto','Zmumu_PTV280_500_CFilterBVeto','Zmumu_PTV280_500_BFilter','Zmumu_PTV500_1000','Zmumu_PTV1000_E_CMS',
-        'Zee_PTV0_70_CVetoBVeto','Zee_PTV0_70_CFilterBVeto','Zee_PTV0_70_BFilter','Zee_PTV70_140_CVetoBVeto','Zee_PTV70_140_CFilterBVeto','Zee_PTV70_140_BFilter','Zee_PTV140_280_CVetoBVeto','Zee_PTV140_280_CFilterBVeto','Zee_PTV140_280_BFilter','Zee_PTV280_500_CVetoBVeto','Zee_PTV280_500_CFilterBVeto','Zee_PTV280_500_BFilter','Zee_PTV500_1000','Zee_PTV1000_E_CMS',
-        'Ztautau_PTV0_70_CVetoBVeto','Ztautau_PTV0_70_CFilterBVeto','Ztautau_PTV0_70_BFilter','Ztautau_PTV70_140_CVetoBVeto','Ztautau_PTV70_140_CFilterBVeto','Ztautau_PTV70_140_BFilter','Ztautau_PTV140_280_CVetoBVeto','Ztautau_PTV140_280_CFilterBVeto','Ztautau_PTV140_280_BFilter','Ztautau_PTV280_500_CVetoBVeto','Ztautau_PTV280_500_CFilterBVeto','Ztautau_PTV280_500_BFilter','Ztautau_PTV500_1000','Ztautau_PTV1000_E_CMS'],
+    r'$Z+jets$' : { #Z + jets
+        'list' : [#'Zmumu_PTV0_70_CVetoBVeto','Zmumu_PTV0_70_CFilterBVeto','Zmumu_PTV0_70_BFilter','Zmumu_PTV70_140_CVetoBVeto','Zmumu_PTV70_140_CFilterBVeto','Zmumu_PTV70_140_BFilter','Zmumu_PTV140_280_CVetoBVeto',
+        'Zmumu_PTV140_280_CFilterBVeto','Zmumu_PTV140_280_BFilter',
+        #'Zmumu_PTV280_500_CVetoBVeto',
+        'Zmumu_PTV280_500_CFilterBVeto','Zmumu_PTV280_500_BFilter','Zmumu_PTV500_1000',
+        #'Zmumu_PTV1000_E_CMS',
+        #'Zee_PTV0_70_CVetoBVeto','Zee_PTV0_70_CFilterBVeto','Zee_PTV0_70_BFilter','Zee_PTV70_140_CVetoBVeto','Zee_PTV70_140_CFilterBVeto','Zee_PTV70_140_BFilter','Zee_PTV140_280_CVetoBVeto',
+        'Zee_PTV140_280_CFilterBVeto','Zee_PTV140_280_BFilter',
+        #'Zee_PTV280_500_CVetoBVeto',
+        'Zee_PTV280_500_CFilterBVeto','Zee_PTV280_500_BFilter','Zee_PTV500_1000',
+        #'Zee_PTV1000_E_CMS',
+        #'Ztautau_PTV0_70_CVetoBVeto','Ztautau_PTV0_70_CFilterBVeto','Ztautau_PTV0_70_BFilter','Ztautau_PTV70_140_CVetoBVeto','Ztautau_PTV70_140_CFilterBVeto','Ztautau_PTV70_140_BFilter','Ztautau_PTV140_280_CVetoBVeto','Ztautau_PTV140_280_CFilterBVeto','Ztautau_PTV140_280_BFilter','Ztautau_PTV280_500_CVetoBVeto','Ztautau_PTV280_500_CFilterBVeto','Ztautau_PTV280_500_BFilter','Ztautau_PTV500_1000','Ztautau_PTV1000_E_CMS'
+            ],
         'color' : "#eef207" # yellow
     },
 
-    r'Background $Diboson$' : { # WW, ZZ, WZ
-        'list' : ['ZqqZll','WqqZll','WpqqWmlv','WlvZqq'],
+    r'$Diboson$' : { # WW, ZZ, WZ
+        'list' : ['ZqqZll',#'WqqZll','WpqqWmlv','WlvZqq'
+        ],
         'color' : "#1fa125" # green
     },
 
-    r'Background $Z -> ll$' : { # Z -> ll
+    r'$Z -> ll$' : { # Z -> ll
         'list' : ['Zee','Zmumu','ttbar_lep'], #'llvv'
         'color' : "#ff0000" # red
     },
 
-    r'Background $Single top$' : { #Single top
+    r'$Single top$' : { #Single top
         'list' : ['single_top_tchan','single_top_wtchan','single_top_schan'],
         'color' : "#00cdff" # light blue
     },
@@ -111,10 +122,16 @@ def calc_mll(lep_pt, lep_eta, lep_phi, lep_E):
     return (p4[:, 0] + p4[:, 1]).M * MeV
 
 #define function to calculate pt of the Z boson candidate
+# .pt calculates the momentum
 def Zpt(lep_pts,lep_etas,lep_phis, lep_E):
     p4 = vector.awk(ak.zip(dict(pt=lep_pts, eta=lep_etas, phi=lep_phis, E=lep_E)))
     return (p4[:,0] + p4[:,1]).pt * MeV
 
+#define function to calculate pt of jets
+# .pt calculates the momentum
+def jetpt(jet_pt):
+    #return ak.pad_none(jet_pt * MeV, 3, axis=1, clip=True) 
+    return ak.pad_none(jet_pt * MeV, 1, axis=1, clip=True)
 
 #Changing a cut
 
@@ -134,6 +151,18 @@ def cut_lep_type(lep_type):
     sum_lep_type = lep_type[:, 0] + lep_type[:, 1]
     return (sum_lep_type != 22) & (sum_lep_type != 26)
 
+#cut on good jets, define function to find jets passing some minimum requirements
+# paper: "Jets are accepted if they fulfill the requirements pT > 25 GeV"
+# paper: jets with pT < 60 GeV and |η| < 2.4 are required to satisfy pileup rejection criteria (JVT)
+def cut_jet_pt(jetpt):
+    return jetpt > 0*GeV
+
+def cut_jet_pt_up(jet_pt):
+    return jet_pt[:, 0]<60*GeV
+
+def cut_jet_jvt(jet_jvt):
+    return jet_jvt[:, 0]>0.59
+
 #Applying a cut
 
 def read_file(path,sample):
@@ -145,12 +174,13 @@ def read_file(path,sample):
     with uproot.open(path + ":mini") as tree:
         numevents = tree.num_entries # number of events
         if 'data' not in sample: xsec_weight = get_xsec_weight(sample) # get cross-section weight
-        for data in tree.iterate(['lep_pt','lep_eta','lep_phi',
-                                  'lep_E','lep_charge','lep_type', 
+        for data in tree.iterate(['lep_pt','lep_eta','lep_phi','lep_E','lep_charge','lep_type',
+                                  'jet_pt','jet_eta','jet_phi','jet_E','jet_n','jet_trueflav', 'jet_jvt','jet_MV2c10',
+                                  #'met_pt','met_phi', 
                                   # add more variables here if you make cuts on them 
                                   'mcWeight','scaleFactor_PILEUP',
                                   'scaleFactor_ELE','scaleFactor_MUON',
-                                  'scaleFactor_LepTRIGGER'], # variables to calculate Monte Carlo weight
+                                  'scaleFactor_LepTRIGGER', 'XSection'], # variables to calculate Monte Carlo weight
                                  library="ak", # choose output type as awkward array
                                  entry_stop=numevents*fraction): # process up to numevents*fraction
 
@@ -166,6 +196,12 @@ def read_file(path,sample):
             # cut on lepton type using the function cut_lep_type defined above
             data = data[~cut_lep_type(data.lep_type)]
 
+            # cut on good jets using the function cut_goodjets defined above
+            #data = data[~cut_jet_pt(data.jet_pt)]
+            #data = data[~cut_jet_pt_up(data.jet_pt)]
+
+            #data = data[~cut_jet_jvt(data.jet_jvt)]
+
             # calculation of 2-lepton invariant mass using the function calc_mll defined above
             data['mll'] = calc_mll(data.lep_pt, data.lep_eta, data.lep_phi, data.lep_E)
 
@@ -173,7 +209,7 @@ def read_file(path,sample):
             #print(data)
 
             # array column can be printed at any stage like this
-            #print(data['lep_pt'])
+            print(data['jet_pt'])
 
             # multiple array columns can be printed at any stage like this
             #print(data[['lep_pt','lep_eta']])
@@ -183,6 +219,11 @@ def read_file(path,sample):
 
             #calculating pt of the Z boson candidate
             data['Zpt'] = Zpt(data.lep_pt, data.lep_eta, data.lep_phi, data.lep_E)
+
+            #calculating pt of the jets
+            data['jetpt'] = jetpt(data.jet_pt)
+
+            print(data['jetpt'])
 
 
             nOut = len(data) # number of events passing cuts in this batch
@@ -331,8 +372,8 @@ plt.show()
 
 def plot_data(data):
 
-    xmin = 65 * GeV
-    xmax = 120 * GeV
+    xmin = 0 * GeV
+    xmax = 200 * GeV
     step_size = 1 * GeV
 
     bin_edges = np.arange(start=xmin, # The interval includes this value
@@ -403,6 +444,136 @@ def plot_data(data):
     
     # x-axis label
     main_axes.set_xlabel(r'Zpt [GeV]',
+                        fontsize=13, x=1, horizontalalignment='right' )
+    
+    # write y-axis label for main axes
+    main_axes.set_ylabel('Events / '+str(step_size)+' GeV',
+                         y=1, horizontalalignment='right') 
+    
+    # set y-axis limits for main axes
+    main_axes.set_ylim( bottom=0, top=np.amax(data_x)*1.6 )
+    
+    # add minor ticks on y-axis for main axes
+    main_axes.yaxis.set_minor_locator( AutoMinorLocator() ) 
+
+    # Add text 'ATLAS Open Data' on plot
+    plt.text(0.05, # x
+             0.93, # y
+             'ATLAS Open Data', # text
+             transform=main_axes.transAxes, # coordinate system used is that of main_axes
+             fontsize=13 ) 
+    
+    # Add text 'for education' on plot
+    plt.text(0.05, # x
+             0.88, # y
+             'for education', # text
+             transform=main_axes.transAxes, # coordinate system used is that of main_axes
+             style='italic',
+             fontsize=8 ) 
+    
+    # Add energy and luminosity
+    lumi_used = str(lumi*fraction) # luminosity to write on the plot
+    plt.text(0.05, # x
+             0.82, # y
+             '$\sqrt{s}$=13 TeV,$\int$L dt = '+lumi_used+' fb$^{-1}$', # text
+             transform=main_axes.transAxes ) # coordinate system used is that of main_axes
+    
+    # Add a label for the analysis carried out
+    plt.text(0.05, # x
+             0.76, # y
+             r'$Z \rightarrow 2\ell$', # text 
+             transform=main_axes.transAxes ) # coordinate system used is that of main_axes
+
+    # draw the legend
+    main_axes.legend( frameon=False ) # no box around the legend
+    
+    #logarithmic y-axis
+    main_axes.set_yscale('log')
+
+    return
+
+plot_data(data)
+plt.show()
+
+#Plotting leading jet pt
+
+def plot_data(data):
+
+    xmin = 25 * GeV
+    xmax = 80 * GeV
+    step_size = 1 * GeV
+
+    bin_edges = np.arange(start=xmin, # The interval includes this value
+                     stop=xmax+step_size, # The interval doesn't include this value
+                     step=step_size ) # Spacing between values
+    bin_centres = np.arange(start=xmin+step_size/2, # The interval includes this value
+                            stop=xmax+step_size/2, # The interval doesn't include this value
+                            step=step_size ) # Spacing between values
+
+    #data_x = np.concatenate(ak.to_numpy(data['data']['jetpt']))
+    data_x,_ = np.histogram(ak.to_numpy(data['data']['jetpt']).flatten(), 
+                            bins=bin_edges ) # histogram the data
+    data_x_errors = np.sqrt( data_x ) # statistical error on the data
+
+
+    mc_x = [] # define list to hold the Monte Carlo histogram entries
+    mc_weights = [] # define list to hold the Monte Carlo weights
+    mc_colors = [] # define list to hold the colors of the Monte Carlo bars
+    mc_labels = [] # define list to hold the legend labels of the Monte Carlo bars
+
+    for s in samples: # loop over samples
+        if s not in ['data']: # if not data
+            mc_x.append( np.resize(ak.to_numpy(ak.pad_none(data[s]['jetpt'], 1, axis=1, clip=True)),(1,1)) ) # append to the list of Monte Carlo histogram entries
+            mc_weights.append( np.resize((ak.to_numpy(data[s].totalWeight )),(1,1)) ) # append to the list of Monte Carlo weights
+            mc_colors.append( samples[s]['color'] ) # append to the list of Monte Carlo bar colors
+            mc_labels.append( s ) # append to the list of Monte Carlo legend labels  
+
+    #ak.to_numpy((data[s]['jetpt'])).flatten()    
+    #ak.to_numpy(data[s].totalWeight).flatten()/ak.to_numpy(ak.pad_none(data[s].totalWeight, 1, axis=0, clip=True)).flatten()
+    # *************
+    # Main plot 
+    # *************
+    main_axes = plt.gca() # get current axes
+    
+    # plot the data points
+    main_axes.errorbar(x=bin_centres, y=data_x, yerr=data_x_errors,
+                       fmt='ko', # 'k' means black and 'o' is for circles 
+                       label='Data') 
+    
+    # plot the Monte Carlo bars
+    #mc_heights = main_axes.hist(mc_x, bins=bin_edges, 
+                                #weights=mc_weights, stacked=True, 
+                                #color=mc_colors, label=mc_labels )
+    
+    #mc_x_tot = mc_heights[0][-1] # stacked background MC y-axis value
+    
+    # calculate MC statistical uncertainty: sqrt(sum w^2)
+    mc_x_err = np.sqrt(np.histogram(np.hstack(mc_x), bins=bin_edges, weights=np.hstack(mc_weights)**2)[0])
+    
+
+    
+    # plot the statistical uncertainty
+    main_axes.bar(bin_centres, # x
+                  2*mc_x_err, # heights
+                  alpha=0.5, # half transparency
+                  #bottom=mc_x_tot-mc_x_err,
+                   color='none', 
+                  hatch="////", width=step_size, label='Stat. Unc.' )
+
+    # set the x-limit of the main axes
+    main_axes.set_xlim( left=xmin, right=xmax ) 
+    
+    # separation of x axis minor ticks
+    main_axes.xaxis.set_minor_locator( AutoMinorLocator() ) 
+    
+    # set the axis tick parameters for the main axes
+    main_axes.tick_params(which='both', # ticks on both x and y axes
+                          direction='in', # Put ticks inside and outside the axes
+                          top=True, # draw ticks on the top axis
+                          right=True ) # draw ticks on right axis
+    
+    # x-axis label
+    main_axes.set_xlabel(r'jet_pt [GeV]',
                         fontsize=13, x=1, horizontalalignment='right' )
     
     # write y-axis label for main axes
