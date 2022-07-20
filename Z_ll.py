@@ -31,20 +31,21 @@ samples = {
     },
 
      r'$t\bar{t}$' : { #ttbar
-        'list' : ['ttbar_lep'], #'Zee','Zmumu',
+        'list' : ['ttbar_lep'],
         'color' : "#6b59d3" # purple
     },
 
-    r'$Z+jets$' : { #Z + jets
-        'list' : [#'Zmumu_PTV0_70_CVetoBVeto','Zmumu_PTV0_70_CFilterBVeto','Zmumu_PTV0_70_BFilter','Zmumu_PTV70_140_CVetoBVeto','Zmumu_PTV70_140_CFilterBVeto','Zmumu_PTV70_140_BFilter','Zmumu_PTV140_280_CVetoBVeto',
-        'Zmumu_PTV140_280_CFilterBVeto','Zmumu_PTV140_280_BFilter',
+    r'$Z -> ll$' : { #Z + jets
+        'list' : ['Zee','Zmumu',
+        #'Zmumu_PTV0_70_CVetoBVeto','Zmumu_PTV0_70_CFilterBVeto','Zmumu_PTV0_70_BFilter','Zmumu_PTV70_140_CVetoBVeto','Zmumu_PTV70_140_CFilterBVeto','Zmumu_PTV70_140_BFilter','Zmumu_PTV140_280_CVetoBVeto',
+        #'Zmumu_PTV140_280_CFilterBVeto','Zmumu_PTV140_280_BFilter',
         #'Zmumu_PTV280_500_CVetoBVeto',
-        'Zmumu_PTV280_500_CFilterBVeto','Zmumu_PTV280_500_BFilter','Zmumu_PTV500_1000',
+        #'Zmumu_PTV280_500_CFilterBVeto','Zmumu_PTV280_500_BFilter','Zmumu_PTV500_1000',
         #'Zmumu_PTV1000_E_CMS',
         #'Zee_PTV0_70_CVetoBVeto','Zee_PTV0_70_CFilterBVeto','Zee_PTV0_70_BFilter','Zee_PTV70_140_CVetoBVeto','Zee_PTV70_140_CFilterBVeto','Zee_PTV70_140_BFilter','Zee_PTV140_280_CVetoBVeto',
-        'Zee_PTV140_280_CFilterBVeto','Zee_PTV140_280_BFilter',
+        #'Zee_PTV140_280_CFilterBVeto','Zee_PTV140_280_BFilter',
         #'Zee_PTV280_500_CVetoBVeto',
-        'Zee_PTV280_500_CFilterBVeto','Zee_PTV280_500_BFilter','Zee_PTV500_1000',
+        #'Zee_PTV280_500_CFilterBVeto','Zee_PTV280_500_BFilter','Zee_PTV500_1000',
         #'Zee_PTV1000_E_CMS',
         #'Ztautau_PTV0_70_CVetoBVeto','Ztautau_PTV0_70_CFilterBVeto','Ztautau_PTV0_70_BFilter','Ztautau_PTV70_140_CVetoBVeto','Ztautau_PTV70_140_CFilterBVeto','Ztautau_PTV70_140_BFilter','Ztautau_PTV140_280_CVetoBVeto','Ztautau_PTV140_280_CFilterBVeto','Ztautau_PTV140_280_BFilter','Ztautau_PTV280_500_CVetoBVeto','Ztautau_PTV280_500_CFilterBVeto','Ztautau_PTV280_500_BFilter','Ztautau_PTV500_1000','Ztautau_PTV1000_E_CMS'
             ],
@@ -57,10 +58,6 @@ samples = {
         'color' : "#1fa125" # green
     },
 
-    r'$Z -> ll$' : { # Z -> ll
-        'list' : ['Zee','Zmumu','ttbar_lep'], #'llvv'
-        'color' : "#ff0000" # red
-    },
 
     r'$Single top$' : { #Single top
         'list' : ['single_top_tchan','single_top_wtchan','single_top_schan'],
@@ -130,7 +127,7 @@ def Zpt(lep_pts,lep_etas,lep_phis, lep_E):
 #define function to calculate pt of jets
 # .pt calculates the momentum
 def jetpt(jet_pt):
-    #return ak.pad_none(jet_pt * MeV, 3, axis=1, clip=True) 
+    #return ak.to_pandas(jet_pt * MeV, how='outer') 
     return ak.pad_none(jet_pt * MeV, 1, axis=1, clip=True)
 
 #Changing a cut
@@ -209,7 +206,7 @@ def read_file(path,sample):
             #print(data)
 
             # array column can be printed at any stage like this
-            #print(data['jet_pt'])
+            print(data['jet_pt'])
 
             # multiple array columns can be printed at any stage like this
             #print(data[['lep_pt','lep_eta']])
@@ -223,7 +220,7 @@ def read_file(path,sample):
             #calculating pt of the jets
             data['jetpt'] = jetpt(data.jet_pt)
 
-            #print(data['jetpt'])
+            print(data['jetpt'])
 
 
             nOut = len(data) # number of events passing cuts in this batch
@@ -363,6 +360,27 @@ def plot_data(data):
     #logarithmic y-axis
     main_axes.set_yscale('log')
 
+
+
+    # *************
+    # Data/MC ratio 
+    # *************
+    plt.axes([0.12,0,0.782,0.2]) #(left, bottom, width, height)
+    ratio_axes = plt.gca()
+    ratio_axes.errorbar( x=bin_centres, y=data_x/mc_x_tot, yerr=data_x_errors/mc_x_tot, fmt='ko')
+    ratio_axes.bar(bin_centres,2*mc_x_err/mc_x_tot,bottom=1-mc_x_err/mc_x_tot,alpha=0.5,color='none',
+        hatch="////",width=step_size)
+    ratio_axes.plot(bin_edges,np.ones(len(bin_edges)),color='k')
+    ratio_axes.set_xlim(left=xmin,right=bin_edges[-1])
+    ratio_axes.xaxis.set_minor_locator(AutoMinorLocator()) # separation of x axis minor ticks
+    ratio_axes.xaxis.set_label_coords(0.9,-0.2) # (x,y) of x axis label # 0.2 down from x axis
+    ratio_axes.set_xlabel(r'2-lepton invariant mass $\mathrm{m_{2l}}$ [GeV]',fontname='sans-serif',fontsize=11)
+    ratio_axes.tick_params(which='both',direction='in',top=True,labeltop=False,right=True,labelright=False)
+    ratio_axes.set_ylim(bottom=0,top=2.5)
+    ratio_axes.set_yticks([0,1,2])
+    ratio_axes.yaxis.set_minor_locator(AutoMinorLocator())
+    ratio_axes.set_ylabel(r'Data/MC',fontname='sans-serif',fontsize=11) 
+    
     return
 
 plot_data(data)
@@ -489,6 +507,25 @@ def plot_data(data):
     
     #logarithmic y-axis
     main_axes.set_yscale('log')
+
+    # *************
+    # Data/MC ratio 
+    # *************
+    plt.axes([0.12,0,0.782,0.2]) #(left, bottom, width, height)
+    ratio_axes = plt.gca()
+    ratio_axes.errorbar( x=bin_centres, y=data_x/mc_x_tot, yerr=data_x_errors/mc_x_tot, fmt='ko')
+    ratio_axes.bar(bin_centres,2*mc_x_err/mc_x_tot,bottom=1-mc_x_err/mc_x_tot,alpha=0.5,color='none',
+        hatch="////",width=step_size)
+    ratio_axes.plot(bin_edges,np.ones(len(bin_edges)),color='k')
+    ratio_axes.set_xlim(left=xmin,right=bin_edges[-1])
+    ratio_axes.xaxis.set_minor_locator(AutoMinorLocator()) # separation of x axis minor ticks
+    ratio_axes.xaxis.set_label_coords(0.9,-0.2) # (x,y) of x axis label # 0.2 down from x axis
+    ratio_axes.set_xlabel(r'Zpt [GeV]',fontname='sans-serif',fontsize=11)
+    ratio_axes.tick_params(which='both',direction='in',top=True,labeltop=False,right=True,labelright=False)
+    ratio_axes.set_ylim(bottom=0,top=2.5)
+    ratio_axes.set_yticks([0,1,2])
+    ratio_axes.yaxis.set_minor_locator(AutoMinorLocator())
+    ratio_axes.set_ylabel(r'Data/MC',fontname='sans-serif',fontsize=11) 
 
     return
 
@@ -617,6 +654,26 @@ def plot_data(data):
     #logarithmic y-axis
     main_axes.set_yscale('log')
 
+    # *************
+    # Data/MC ratio 
+    # *************
+    plt.axes([0.12,0,0.782,0.2]) #(left, bottom, width, height)
+    ratio_axes = plt.gca()
+    ratio_axes.errorbar( x=bin_centres, y=data_x/mc_x_tot, yerr=data_x_errors/mc_x_tot, fmt='ko')
+    ratio_axes.bar(bin_centres,2*mc_x_err/mc_x_tot,bottom=1-mc_x_err/mc_x_tot,alpha=0.5,color='none',
+        hatch="////",width=step_size)
+    ratio_axes.plot(bin_edges,np.ones(len(bin_edges)),color='k')
+    ratio_axes.set_xlim(left=xmin,right=bin_edges[-1])
+    ratio_axes.xaxis.set_minor_locator(AutoMinorLocator()) # separation of x axis minor ticks
+    ratio_axes.xaxis.set_label_coords(0.9,-0.2) # (x,y) of x axis label # 0.2 down from x axis
+    ratio_axes.set_xlabel(r'Number of Jets',fontname='sans-serif',fontsize=11)
+    ratio_axes.tick_params(which='both',direction='in',top=True,labeltop=False,right=True,labelright=False)
+    ratio_axes.set_ylim(bottom=0,top=2.5)
+    ratio_axes.set_yticks([0,1,2])
+    ratio_axes.yaxis.set_minor_locator(AutoMinorLocator())
+    ratio_axes.set_ylabel(r'Data/MC',fontname='sans-serif',fontsize=11) 
+
+
     return
 
 plot_data(data)
@@ -668,11 +725,11 @@ def plot_data(data):
                        label='Data') 
     
     # plot the Monte Carlo bars
-    #mc_heights = main_axes.hist(mc_x, bins=bin_edges, 
-                                #weights=mc_weights, stacked=True, 
-                                #color=mc_colors, label=mc_labels )
+    mc_heights = main_axes.hist(mc_x, bins=bin_edges, 
+                                weights=mc_weights, stacked=True, 
+                                color=mc_colors, label=mc_labels )
     
-    #mc_x_tot = mc_heights[0][-1] # stacked background MC y-axis value
+    mc_x_tot = mc_heights[0][-1] # stacked background MC y-axis value
     
     # calculate MC statistical uncertainty: sqrt(sum w^2)
     mc_x_err = np.sqrt(np.histogram(np.hstack(mc_x), bins=bin_edges, weights=np.hstack(mc_weights)**2)[0])
@@ -746,6 +803,25 @@ def plot_data(data):
     
     #logarithmic y-axis
     main_axes.set_yscale('log')
+
+    # *************
+    # Data/MC ratio 
+    # *************
+    plt.axes([0.12,0,0.782,0.2]) #(left, bottom, width, height)
+    ratio_axes = plt.gca()
+    ratio_axes.errorbar( x=bin_centres, y=data_x/mc_x_tot, yerr=data_x_errors/mc_x_tot, fmt='ko')
+    ratio_axes.bar(bin_centres,2*mc_x_err/mc_x_tot,bottom=1-mc_x_err/mc_x_tot,alpha=0.5,color='none',
+        hatch="////",width=step_size)
+    ratio_axes.plot(bin_edges,np.ones(len(bin_edges)),color='k')
+    ratio_axes.set_xlim(left=xmin,right=bin_edges[-1])
+    ratio_axes.xaxis.set_minor_locator(AutoMinorLocator()) # separation of x axis minor ticks
+    ratio_axes.xaxis.set_label_coords(0.9,-0.2) # (x,y) of x axis label # 0.2 down from x axis
+    ratio_axes.set_xlabel(r'jet_pt [GeV]',fontname='sans-serif',fontsize=11)
+    ratio_axes.tick_params(which='both',direction='in',top=True,labeltop=False,right=True,labelright=False)
+    ratio_axes.set_ylim(bottom=0,top=2.5)
+    ratio_axes.set_yticks([0,1,2])
+    ratio_axes.yaxis.set_minor_locator(AutoMinorLocator())
+    ratio_axes.set_ylabel(r'Data/MC',fontname='sans-serif',fontsize=11) 
 
     return
 
