@@ -30,26 +30,14 @@ samples = {
         'list' : ['data_A','data_B','data_C','data_D'],
     },
 
-     r'$t\bar{t}$' : { #ttbar
-        'list' : ['ttbar_lep'],
-        'color' : "#6b59d3" # purple
+    r'$Z -> ll$' : { #Z + jets
+        'list' : ['Zee','Zmumu', 'Ztautau'],
+        'color' : "#eef207" # yellow
     },
 
-    r'$Z -> ll$' : { #Z + jets
-        'list' : ['Zee','Zmumu',
-        #'Zmumu_PTV0_70_CVetoBVeto','Zmumu_PTV0_70_CFilterBVeto','Zmumu_PTV0_70_BFilter','Zmumu_PTV70_140_CVetoBVeto','Zmumu_PTV70_140_CFilterBVeto','Zmumu_PTV70_140_BFilter','Zmumu_PTV140_280_CVetoBVeto',
-        #'Zmumu_PTV140_280_CFilterBVeto','Zmumu_PTV140_280_BFilter',
-        #'Zmumu_PTV280_500_CVetoBVeto',
-        #'Zmumu_PTV280_500_CFilterBVeto','Zmumu_PTV280_500_BFilter','Zmumu_PTV500_1000',
-        #'Zmumu_PTV1000_E_CMS',
-        #'Zee_PTV0_70_CVetoBVeto','Zee_PTV0_70_CFilterBVeto','Zee_PTV0_70_BFilter','Zee_PTV70_140_CVetoBVeto','Zee_PTV70_140_CFilterBVeto','Zee_PTV70_140_BFilter','Zee_PTV140_280_CVetoBVeto',
-        #'Zee_PTV140_280_CFilterBVeto','Zee_PTV140_280_BFilter',
-        #'Zee_PTV280_500_CVetoBVeto',
-        #'Zee_PTV280_500_CFilterBVeto','Zee_PTV280_500_BFilter','Zee_PTV500_1000',
-        #'Zee_PTV1000_E_CMS',
-        #'Ztautau_PTV0_70_CVetoBVeto','Ztautau_PTV0_70_CFilterBVeto','Ztautau_PTV0_70_BFilter','Ztautau_PTV70_140_CVetoBVeto','Ztautau_PTV70_140_CFilterBVeto','Ztautau_PTV70_140_BFilter','Ztautau_PTV140_280_CVetoBVeto','Ztautau_PTV140_280_CFilterBVeto','Ztautau_PTV140_280_BFilter','Ztautau_PTV280_500_CVetoBVeto','Ztautau_PTV280_500_CFilterBVeto','Ztautau_PTV280_500_BFilter','Ztautau_PTV500_1000','Ztautau_PTV1000_E_CMS'
-            ],
-        'color' : "#eef207" # yellow
+    r'$t\bar{t}$' : { #ttbar
+        'list' : ['ttbar_lep'],
+        'color' : "#6b59d3" # purple
     },
 
     r'$Diboson$' : { # WW, ZZ, WZ
@@ -58,6 +46,21 @@ samples = {
         'color' : "#1fa125" # green
     },
 
+     r'$DY$' : { #DY
+        'list' : ['Zmumu_PTV0_70_CVetoBVeto','Zmumu_PTV0_70_CFilterBVeto','Zmumu_PTV0_70_BFilter','Zmumu_PTV70_140_CVetoBVeto','Zmumu_PTV70_140_CFilterBVeto','Zmumu_PTV70_140_BFilter','Zmumu_PTV140_280_CVetoBVeto',
+        'Zmumu_PTV140_280_CFilterBVeto','Zmumu_PTV140_280_BFilter',
+        'Zmumu_PTV280_500_CVetoBVeto',
+        'Zmumu_PTV280_500_CFilterBVeto','Zmumu_PTV280_500_BFilter','Zmumu_PTV500_1000',
+        'Zmumu_PTV1000_E_CMS',
+        'Zee_PTV0_70_CVetoBVeto','Zee_PTV0_70_CFilterBVeto','Zee_PTV0_70_BFilter','Zee_PTV70_140_CVetoBVeto','Zee_PTV70_140_CFilterBVeto','Zee_PTV70_140_BFilter','Zee_PTV140_280_CVetoBVeto',
+        'Zee_PTV140_280_CFilterBVeto','Zee_PTV140_280_BFilter',
+        'Zee_PTV280_500_CVetoBVeto',
+        'Zee_PTV280_500_CFilterBVeto','Zee_PTV280_500_BFilter','Zee_PTV500_1000',
+        'Zee_PTV1000_E_CMS',
+        'Ztautau_PTV0_70_CVetoBVeto','Ztautau_PTV0_70_CFilterBVeto','Ztautau_PTV0_70_BFilter','Ztautau_PTV70_140_CVetoBVeto','Ztautau_PTV70_140_CFilterBVeto','Ztautau_PTV70_140_BFilter','Ztautau_PTV140_280_CVetoBVeto','Ztautau_PTV140_280_CFilterBVeto','Ztautau_PTV140_280_BFilter','Ztautau_PTV280_500_CVetoBVeto','Ztautau_PTV280_500_CFilterBVeto','Ztautau_PTV280_500_BFilter','Ztautau_PTV500_1000','Ztautau_PTV1000_E_CMS'
+        ],
+        'color' : "#ff0000" # red
+    },
 
     r'$Single top$' : { #Single top
         'list' : ['single_top_tchan','single_top_wtchan','single_top_schan'],
@@ -127,8 +130,7 @@ def Zpt(lep_pts,lep_etas,lep_phis, lep_E):
 #define function to calculate pt of jets
 # .pt calculates the momentum
 def jetpt(jet_pt):
-    #return ak.to_pandas(jet_pt * MeV, how='outer') 
-    return ak.pad_none(jet_pt * MeV, 1, axis=1, clip=True)
+    return ak.num(jet_pt *MeV)
 
 #Changing a cut
 
@@ -313,8 +315,8 @@ def plot_data(data):
                           right=True ) # draw ticks on right axis
     
     # x-axis label
-    main_axes.set_xlabel(r'2-lepton invariant mass $\mathrm{m_{2l}}$ [GeV]',
-                        fontsize=13, x=1, horizontalalignment='right' )
+    #main_axes.set_xlabel(r'2-lepton invariant mass $\mathrm{m_{2l}}$ [GeV]',
+                        #fontsize=13, x=1, horizontalalignment='right' )
     
     # write y-axis label for main axes
     main_axes.set_ylabel('Events / '+str(step_size)+' GeV',
@@ -365,7 +367,7 @@ def plot_data(data):
     # *************
     # Data/MC ratio 
     # *************
-    plt.axes([0.12,0,0.782,0.2]) #(left, bottom, width, height)
+    plt.axes([0.122,0.08,0.83,0.2]) #(left, bottom, width, height)
     ratio_axes = plt.gca()
     ratio_axes.errorbar( x=bin_centres, y=data_x/mc_x_tot, yerr=data_x_errors/mc_x_tot, fmt='ko')
     ratio_axes.bar(bin_centres,2*mc_x_err/mc_x_tot,bottom=1-mc_x_err/mc_x_tot,alpha=0.5,color='none',
@@ -384,6 +386,7 @@ def plot_data(data):
     return
 
 plot_data(data)
+plt.savefig("mll.png")
 plt.show()
 
 #Plotting Zpt
@@ -461,8 +464,8 @@ def plot_data(data):
                           right=True ) # draw ticks on right axis
     
     # x-axis label
-    main_axes.set_xlabel(r'Zpt [GeV]',
-                        fontsize=13, x=1, horizontalalignment='right' )
+    #main_axes.set_xlabel(r'Zpt [GeV]',
+                        #fontsize=13, x=1, horizontalalignment='right' )
     
     # write y-axis label for main axes
     main_axes.set_ylabel('Events / '+str(step_size)+' GeV',
@@ -511,7 +514,7 @@ def plot_data(data):
     # *************
     # Data/MC ratio 
     # *************
-    plt.axes([0.12,0,0.782,0.2]) #(left, bottom, width, height)
+    plt.axes([0.122,0.08,0.83,0.2]) #(left, bottom, width, height)
     ratio_axes = plt.gca()
     ratio_axes.errorbar( x=bin_centres, y=data_x/mc_x_tot, yerr=data_x_errors/mc_x_tot, fmt='ko')
     ratio_axes.bar(bin_centres,2*mc_x_err/mc_x_tot,bottom=1-mc_x_err/mc_x_tot,alpha=0.5,color='none',
@@ -530,6 +533,7 @@ def plot_data(data):
     return
 
 plot_data(data)
+plt.savefig("Zpt.png")
 plt.show()
 
 #Plotting number of jets
@@ -607,8 +611,8 @@ def plot_data(data):
                           right=True ) # draw ticks on right axis
     
     # x-axis label
-    main_axes.set_xlabel(r'Number of Jets',
-                        fontsize=13, x=1, horizontalalignment='right' )
+    #main_axes.set_xlabel(r'Number of Jets',
+                        #fontsize=13, x=1, horizontalalignment='right' )
     
     # write y-axis label for main axes
     main_axes.set_ylabel('Events / '+str(step_size)+' GeV',
@@ -657,7 +661,7 @@ def plot_data(data):
     # *************
     # Data/MC ratio 
     # *************
-    plt.axes([0.12,0,0.782,0.2]) #(left, bottom, width, height)
+    plt.axes([0.122,0.08,0.855,0.2]) #(left, bottom, width, height)
     ratio_axes = plt.gca()
     ratio_axes.errorbar( x=bin_centres, y=data_x/mc_x_tot, yerr=data_x_errors/mc_x_tot, fmt='ko')
     ratio_axes.bar(bin_centres,2*mc_x_err/mc_x_tot,bottom=1-mc_x_err/mc_x_tot,alpha=0.5,color='none',
@@ -677,14 +681,15 @@ def plot_data(data):
     return
 
 plot_data(data)
+plt.savefig("Number of Jets.png")
 plt.show()
 
 #Plotting leading jet pt
 
 def plot_data(data):
 
-    xmin = 25 * GeV
-    xmax = 80 * GeV
+    xmin = 0 #25 * GeV
+    xmax = 15 * GeV#80 * GeV
     step_size = 1 * GeV
 
     bin_edges = np.arange(start=xmin, # The interval includes this value
@@ -694,8 +699,7 @@ def plot_data(data):
                             stop=xmax+step_size/2, # The interval doesn't include this value
                             step=step_size ) # Spacing between values
 
-    #data_x = np.concatenate(ak.to_numpy(data['data']['jetpt']))
-    data_x,_ = np.histogram(ak.to_numpy(data['data']['jetpt']).flatten(), 
+    data_x,_ = np.histogram(ak.to_numpy(data['data']['jetpt']), 
                             bins=bin_edges ) # histogram the data
     data_x_errors = np.sqrt( data_x ) # statistical error on the data
 
@@ -707,13 +711,13 @@ def plot_data(data):
 
     for s in samples: # loop over samples
         if s not in ['data']: # if not data
-            mc_x.append( np.resize(ak.to_numpy(ak.pad_none(data[s]['jetpt'], 1, axis=1, clip=True)),(1,1)) ) # append to the list of Monte Carlo histogram entries
-            mc_weights.append( np.resize((ak.to_numpy(data[s].totalWeight )),(1,1)) ) # append to the list of Monte Carlo weights
+            mc_x.append(ak.to_numpy(data[s]['jetpt'])) # append to the list of Monte Carlo histogram entries
+            mc_weights.append(ak.to_numpy(data[s].totalWeight)) # append to the list of Monte Carlo weights
             mc_colors.append( samples[s]['color'] ) # append to the list of Monte Carlo bar colors
             mc_labels.append( s ) # append to the list of Monte Carlo legend labels  
 
-    #ak.to_numpy((data[s]['jetpt'])).flatten()    
-    #ak.to_numpy(data[s].totalWeight).flatten()/ak.to_numpy(ak.pad_none(data[s].totalWeight, 1, axis=0, clip=True)).flatten()
+    #np.resize(ak.to_numpy(ak.pad_none(data[s]['jetpt'], 1, axis=1, clip=True)),(1,1))    
+    #np.resize((ak.to_numpy(data[s].totalWeight )),(1,1)) /ak.to_numpy(ak.pad_none(data[s].totalWeight, 1, axis=0, clip=True)).flatten()
     # *************
     # Main plot 
     # *************
@@ -826,4 +830,5 @@ def plot_data(data):
     return
 
 plot_data(data)
+plt.savefig("Jet pt.png")
 plt.show()
