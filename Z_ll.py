@@ -126,7 +126,7 @@ def Zpt(lep_pts,lep_etas,lep_phis, lep_E):
 #define function to calculate pt of the MET
 # .pt calculates the momentum
 def met_et(met_pts):
-    return met_pts * GeV
+    return met_pts * MeV
 
 #define function to calculate pt of jets
 # .pt calculates the momentum
